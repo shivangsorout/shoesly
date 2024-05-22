@@ -26,7 +26,10 @@ class FirebaseEventFetchBrandShoes extends FirebaseEvent {
 }
 
 class FirebaseEventResetState extends FirebaseEvent {
-  const FirebaseEventResetState();
+  final bool resetAll;
+  const FirebaseEventResetState({
+    this.resetAll = false,
+  });
 }
 
 class FirebaseEventFilterShoes extends FirebaseEvent {

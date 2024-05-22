@@ -46,12 +46,13 @@ class _CartItemTileState extends State<CartItemTile>
   @override
   Widget build(BuildContext context) {
     return Slidable(
-      key: UniqueKey(),
+      key: Key(cartItem.documentId),
       controller: _slidableController,
       endActionPane: ActionPane(
-        key: UniqueKey(),
+        key: Key(cartItem.documentId),
         motion: const StretchMotion(),
         dismissible: DismissiblePane(
+          closeOnCancel: true,
           onDismissed: () {
             widget.onPressed();
           },
@@ -66,7 +67,9 @@ class _CartItemTileState extends State<CartItemTile>
               bottomLeft: Radius.circular(20),
             ),
             onPressed: (context) {
-              widget.onPressed();
+              widget
+                  .confirmDismiss()
+                  .then((value) => value ? widget.onPressed() : null);
             },
             autoClose: true,
             child: SvgPicture.asset(

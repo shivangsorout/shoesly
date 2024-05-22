@@ -94,6 +94,14 @@ class _HomeViewState extends State<HomeView> {
             );
           }
         }
+        if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+          showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                    title: const Text('Error'),
+                    content: Text(state.errorMessage!),
+                  ));
+        }
       },
       builder: (context, state) {
         bool isFilterListNotEmpty =
@@ -162,23 +170,20 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
                 actions: [
-                  Visibility(
-                    visible: state.isLoading,
-                    child: TextButton(
-                      onPressed: () {
-                        context
-                            .read<FirebaseBloc>()
-                            .add(const FirebaseEventResetState());
-                        context
-                            .read<FirebaseBloc>()
-                            .add(const FirebaseEventFetchShoes());
-                      },
-                      child: Text(
-                        'Reset Page',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 0.0205 * context.mqSize.height,
-                        ),
+                  TextButton(
+                    onPressed: () {
+                      context
+                          .read<FirebaseBloc>()
+                          .add(const FirebaseEventResetState(resetAll: true));
+                      context
+                          .read<FirebaseBloc>()
+                          .add(const FirebaseEventFetchShoes());
+                    },
+                    child: Text(
+                      'Reload App',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 0.0205 * context.mqSize.height,
                       ),
                     ),
                   ),
@@ -228,15 +233,19 @@ class _HomeViewState extends State<HomeView> {
                                 ? const Center(
                                     child: CircularProgressIndicator())
                                 : listLength == 0
-                                    ? Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          vertical:
-                                              0.0228 * context.mqSize.height,
-                                        ),
-                                        child: const Text(
-                                          'No shoe found!',
-                                        ),
-                                      )
+                                    ? state.successMessage == null ||
+                                            (state.successMessage != null &&
+                                                state.successMessage!.isEmpty)
+                                        ? Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: 0.0228 *
+                                                  context.mqSize.height,
+                                            ),
+                                            child: const Text(
+                                              'No shoe found!',
+                                            ),
+                                          )
+                                        : const Text('')
                                     : GridView.builder(
                                         controller: _scrollController,
                                         shrinkWrap: true,

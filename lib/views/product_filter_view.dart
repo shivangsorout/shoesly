@@ -221,22 +221,23 @@ class _ProductFilterViewState extends State<ProductFilterView> {
                       child: BlackButton(
                         buttonText: 'APPLY',
                         onPressed: () {
+                          final filter = FilterClass(
+                            brand: selectedBrand,
+                            color: selectedColor,
+                            filteredShoes: [],
+                            gender: selectedGenderTag,
+                            sortBy: selectedSortTag,
+                            lowerPrice: _lowerValue,
+                            upperPrice: _upperValue,
+                          );
                           context
                               .read<FirebaseBloc>()
                               .add(const FirebaseEventResetState());
-                          if (_lowerValue != 0 || _upperValue != 1750) {
+                          if (!filter.isNull) {
                             context
                                 .read<FirebaseBloc>()
                                 .add(FirebaseEventFilterShoes(
-                                  filter: FilterClass(
-                                    brand: selectedBrand,
-                                    color: selectedColor,
-                                    filteredShoes: [],
-                                    gender: selectedGenderTag,
-                                    sortBy: selectedSortTag,
-                                    lowerPrice: _lowerValue,
-                                    upperPrice: _upperValue,
-                                  ),
+                                  filter: filter,
                                 ));
                           } else {
                             context

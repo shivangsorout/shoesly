@@ -22,28 +22,41 @@ class FirebaseService {
     await FirebaseAuth.instance.signInAnonymously();
   }
 
+  // For getting all brands list
   Future<List<Brand>> getBrandsList() async {
-    final List<Brand> brandsList = [];
-    final QuerySnapshot<Map<String, dynamic>> querySnapshot =
-        await brands.get();
-    for (QueryDocumentSnapshot<Map<String, dynamic>> doc
-        in querySnapshot.docs) {
-      brandsList.add(Brand.fromSnapshot(doc));
+    try {
+      final List<Brand> brandsList = [];
+      final QuerySnapshot<Map<String, dynamic>> querySnapshot =
+          await brands.get();
+      for (QueryDocumentSnapshot<Map<String, dynamic>> doc
+          in querySnapshot.docs) {
+        brandsList.add(Brand.fromSnapshot(doc));
+      }
+      return brandsList;
+    } catch (e) {
+      devtools.log("Error fetching brands: $e");
+      rethrow;
     }
-    return brandsList;
   }
 
+  // For getting all colors map
   Future<Map<String, dynamic>> getAllColors() async {
-    final Map<String, dynamic> colorsMap = {};
-    final QuerySnapshot<Map<String, dynamic>> querySnapshot =
-        await colors.get();
-    for (QueryDocumentSnapshot<Map<String, dynamic>> doc
-        in querySnapshot.docs) {
-      colorsMap.addAll(doc.data());
+    try {
+      final Map<String, dynamic> colorsMap = {};
+      final QuerySnapshot<Map<String, dynamic>> querySnapshot =
+          await colors.get();
+      for (QueryDocumentSnapshot<Map<String, dynamic>> doc
+          in querySnapshot.docs) {
+        colorsMap.addAll(doc.data());
+      }
+      return colorsMap;
+    } catch (e) {
+      devtools.log("Error fetching colors: $e");
+      rethrow;
     }
-    return colorsMap;
   }
 
+  // For getting all shoe list
   Future<List<Shoe>> getAllShoesList({String? lastDocumentId}) async {
     try {
       final List<Shoe> shoesList = [];
@@ -72,11 +85,11 @@ class FirebaseService {
       return shoesList;
     } catch (e) {
       devtools.log('Error fetching shoes: $e');
-      // Handle error gracefully, you may log the error, show a snackbar, or retry the operation.
       rethrow;
     }
   }
 
+  // For getting brand specific shoe list
   Future<List<Shoe>> getShoesListByBrand({
     String? lastDocumentId,
     required String brandName,
@@ -114,12 +127,13 @@ class FirebaseService {
       }
       return shoesList;
     } catch (e) {
-      devtools.log('Error fetching shoes: $e');
+      devtools.log('Error fetching specific brands shoes: $e');
       // Handle error gracefully, you may log the error, show a snackbar, or retry the operation.
       rethrow;
     }
   }
 
+  // For getting filtered shoe list
   Future<List<Shoe>> getShoesListByFilters({
     double? startPriceRange,
     double? endPriceRange,
@@ -157,7 +171,7 @@ class FirebaseService {
             query = query.orderBy(keyShoePrice);
             break;
           case 'Highest reviews':
-            query = query.orderBy(keyRating, descending: true);
+            query = query.orderBy(keyAverageRating, descending: true);
             break;
           default:
             break;
@@ -182,11 +196,12 @@ class FirebaseService {
 
       return shoesList;
     } catch (e) {
-      devtools.log('Error fetching shoes: $e');
+      devtools.log('Error fetching filtered shoes: $e');
       rethrow;
     }
   }
 
+  // For getting all reviews
   Future<List<Review>> fetchAllReviews({
     required String documentID,
     int pageSize = 10,
@@ -220,6 +235,7 @@ class FirebaseService {
     }
   }
 
+  // For getting all rating specific reviews
   Future<List<Review>> fetchReviewsByRating({
     required String documentID,
     required double rating,
@@ -258,12 +274,13 @@ class FirebaseService {
     }
   }
 
+  // For placing order
   Future<void> placeOrder({required Map<String, dynamic> orderData}) async {
     try {
       await orders.add(orderData);
       devtools.log('Order added successfully');
     } catch (e) {
-      devtools.log('Error adding order: $e');
+      devtools.log('Error placing order: $e');
       rethrow;
     }
   }

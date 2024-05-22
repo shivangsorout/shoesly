@@ -10,12 +10,13 @@ abstract class FirebaseState {
   final List<ShoeCart> cart;
   final bool isLoading;
   final String loadingText;
-  final Exception? exception;
+  final String? errorMessage;
   final List<Brand> brands;
   final Map<String, dynamic> colors;
   final List<Shoe> shoes;
   final Brand? selectedBrandAtHome;
   final FilterClass? filter;
+  final String? successMessage;
 
   const FirebaseState({
     required this.shoes,
@@ -24,9 +25,10 @@ abstract class FirebaseState {
     required this.selectedBrandAtHome,
     this.isLoading = false,
     this.loadingText = 'Please wait while data is loading!',
-    this.exception,
+    this.errorMessage,
     required this.brands,
     this.filter,
+    this.successMessage,
   });
 }
 
@@ -36,7 +38,7 @@ class FirebaseStateDiscover extends FirebaseState {
     required super.colors,
     super.isLoading,
     super.loadingText,
-    super.exception,
+    super.errorMessage,
     required super.brands,
     required super.shoes,
     super.selectedBrandAtHome,
@@ -45,17 +47,16 @@ class FirebaseStateDiscover extends FirebaseState {
 }
 
 class FirebaseStateEmptyState extends FirebaseState {
-  final String? successMessage;
   const FirebaseStateEmptyState({
     required super.shoes,
     required super.cart,
     required super.brands,
     required super.colors,
     required super.selectedBrandAtHome,
-    this.successMessage,
+    super.successMessage,
     super.filter,
     super.isLoading,
-    super.exception,
+    super.errorMessage,
     super.loadingText,
   });
 }
@@ -74,7 +75,7 @@ class FirebaseStateReviews extends FirebaseState {
     super.selectedBrandAtHome,
     super.isLoading,
     super.loadingText,
-    super.exception,
+    super.errorMessage,
     required super.brands,
     super.filter,
     required this.reviews,

@@ -40,111 +40,118 @@ class _CartViewState extends State<CartView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<FirebaseBloc, FirebaseState>(
-      listener: (context, state) {
-        setState(() {
-          cart = state.cart;
-          grandTotal = (state.cart.fold(
-                  0.0,
-                  (sum, cartItem) =>
-                      sum + (cartItem.price * cartItem.quantity)))
-              .toStringAsFixed(2);
-        });
-      },
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(
-            appBarHeight * context.mqSize.height,
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: appBarLeftPadding * context.mqSize.width,
-              right: appBarRightPadding * context.mqSize.width,
+    return BlocBuilder<FirebaseBloc, FirebaseState>(
+      builder: (context, state) {
+        grandTotal = (state.cart.fold(0.0,
+                (sum, cartItem) => sum + (cartItem.price * cartItem.quantity)))
+            .toStringAsFixed(2);
+        return Scaffold(
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(
+              appBarHeight * context.mqSize.height,
             ),
-            child: AppBar(
-              title: const Text('Cart'),
-              centerTitle: true,
-            ),
-          ),
-        ),
-        body: Stack(
-          children: [
-            ListView.builder(
+            child: Padding(
               padding: EdgeInsets.only(
-                top: 0.0342 * context.mqSize.height,
-                bottom: 0.146 * context.mqSize.height,
+                left: appBarLeftPadding * context.mqSize.width,
+                right: appBarRightPadding * context.mqSize.width,
               ),
-              itemCount: cart.length,
-              itemBuilder: (context, index) {
-                return CartItemTile(
-                  onQuantityChange: (quantity) {
-                    setState(() {
-                      cart[index].quantity = quantity;
-                    });
-                  },
-                  cartItem: cart[index],
-                  index: index,
-                  confirmDismiss: () {
-                    return showDialog<bool>(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title:
-                              const Text('Are you sure you want to delete it?'),
-                          actions: [
-                            MaterialButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(true);
-                              },
-                              child: const Text('Yes'),
-                            ),
-                            MaterialButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(false);
-                              },
-                              child: const Text('No'),
-                            ),
-                          ],
-                        );
-                      },
-                    ).then((value) => value ?? false);
-                  },
-                  onPressed: () {
-                    devtools.log('Slided');
-                    cart.removeAt(index);
-                    context.read<FirebaseBloc>().add(
-                        FirebaseEventDeleteFromCart(cartItem: cart[index]));
-                  },
-                );
-              },
+              child: AppBar(
+                title: const Text('Cart'),
+                centerTitle: true,
+                notificationPredicate: (notification) => false,
+              ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: BottomBar(
-                children: [
-                  LabelAmountWidget(
-                    labelText: 'Grand Total',
-                    amount: grandTotal!,
+          ),
+          body: Stack(
+            children: [
+              Visibility(
+                visible: state.cart.isNotEmpty,
+                replacement: const Center(
+                  child: Text(
+                    'Your cart is empty!',
                   ),
-                  BlackButton(
-                    buttonText: 'CHECK OUT',
-                    onPressed: cart.isEmpty
-                        ? null
-                        : () {
-                            Navigator.of(context).pushNamed(
-                              orderSummaryRoute,
-                              arguments: {
-                                argKeyGrandTotal: double.parse(grandTotal!)
-                              },
+                ),
+                child: ListView.builder(
+                  key: UniqueKey(),
+                  padding: EdgeInsets.only(
+                    top: 0.0342 * context.mqSize.height,
+                    bottom: 0.146 * context.mqSize.height,
+                  ),
+                  itemCount: state.cart.length,
+                  itemBuilder: (context, index) {
+                    if (state.cart[index].price == 0) {}
+                    devtools.log(state.cart[index].shoeName);
+                    return CartItemTile(
+                      onQuantityChange: (quantity) {
+                        setState(() {
+                          state.cart[index].quantity = quantity;
+                        });
+                      },
+                      cartItem: state.cart[index],
+                      index: index,
+                      confirmDismiss: () {
+                        return showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text(
+                                  'Are you sure you want to delete it?'),
+                              actions: [
+                                MaterialButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(true);
+                                  },
+                                  child: const Text('Yes'),
+                                ),
+                                MaterialButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                  child: const Text('No'),
+                                ),
+                              ],
                             );
                           },
-                  ),
-                ],
+                        ).then((value) => value ?? false);
+                      },
+                      onPressed: () {
+                        devtools.log('Slided');
+                        context.read<FirebaseBloc>().add(
+                            FirebaseEventDeleteFromCart(
+                                cartItem: state.cart[index]));
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: BottomBar(
+                  children: [
+                    LabelAmountWidget(
+                      labelText: 'Grand Total',
+                      amount: grandTotal!,
+                    ),
+                    BlackButton(
+                      buttonText: 'CHECK OUT',
+                      onPressed: state.cart.isEmpty
+                          ? null
+                          : () {
+                              Navigator.of(context).pushNamed(
+                                orderSummaryRoute,
+                                arguments: {
+                                  argKeyGrandTotal: double.parse(grandTotal!)
+                                },
+                              );
+                            },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
